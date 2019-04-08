@@ -4,7 +4,9 @@ program_name="$(basename $0)"
 
 usage()
 {
-    echo "$program_name: usage cp SOURCE... DEST"
+    echo "Usage: #program_name [OPTIONS] SOURCE... "
+    echo "  -d --dest       specify the destination for SOURCE contents. If not"
+    echo "                  specified, deaults to './'"
     exit 0
 }
 
@@ -41,10 +43,6 @@ for target in $source; do
         cp_targets="$cp_targets $target/."
     fi
 done
-
-echo $cp_targets
-echo $dest
-echo $source
 
 cp -a $cp_targets "$dest"
 rm -r $source
