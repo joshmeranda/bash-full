@@ -1,4 +1,4 @@
-#!/bin/bashs
+#!/bin/bash
 # uses chmod and touch to create a file or files with specific permission
 
 program_name="$(basename $0)"
