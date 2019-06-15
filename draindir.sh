@@ -11,7 +11,7 @@ usage()
 }
 
 opts=$(getopt -o "d:" --long "dest,help": -- "$@")
-eval set -- "$opts"
+eval set -- "${opts}"
 
 if [ "$#" -eq 1 ]; then usage; fi
 
@@ -35,7 +35,7 @@ if [ -z "$dest" ]; then dest="./"; fi
 
 if [ ! -d "$dest" ]; then mkdir "$dest"; fi
 
-for target in $source; do
+for target in "$source"; do
     if [ ! -f "$target" ] && [ ! -d "$target" ]; then
         echo "$program_name: no such file or directory '$target'"
         source="${source[@]/$target}"
@@ -44,7 +44,7 @@ for target in $source; do
     fi
 done
 
-cp -a $cp_targets "$dest"
-rm -r $source
+cp -a "$cp_targets" "$dest"
+rm -r "$source"
 
 exit "$?"
