@@ -70,7 +70,7 @@ while :; do
         -d | --dest) dest="$2"
             shift
             ;;
-        --ignore-file) pakignore="$1"
+        --ignore-file) pakignore="$2"
             shift
             ;;
         --) shift
@@ -84,22 +84,13 @@ done
 if [ -z "$target_dir" ]; then target_dir="."; fi
 if [ -z "$pakignore" ]; then pakignore="${target_dir}/.pakignore"; fi
 if [ ! -d "$target_dir" ]; then echo_err "no such directory '$1'" 1; fi
-if [ -z "$2" ]; then
-    zip_file="$(basename ${target_dir})_pak.zip";
-else
-    zip_file="$2"
-fi
+if [ -z "$dest" ]; then dest="."; fi
+if [ "$target_dir" == "." ]; then zip_file="$dest/$(basename $(pwd))_pak.zip";
+else zip_file="$dest/${target_dir}_pak.zip"; fi
 
 target_files=()
 ignore_targets=()
 get_ignore_targets
 get_target_files "$target_dir"
 
-echo "target_dir: $target_dir"
-echo "pakignore: $pakignore"
-echo "raw targets: ${target_files[@]}"
-echo "ignore_targets: ${ignore_targets[@]}"
-
-# zip -r "$zip_file" "${target_files[@]}"
-
-if [ ! -z "$dest" ]; then mv "$zip_file" "$dest"; fi
+zip -r "$zip_file" "${target_files[@]}"
