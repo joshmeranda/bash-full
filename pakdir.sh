@@ -39,9 +39,7 @@ get_target_files()
     local sub_dirs=()
 
     for ignore in "${ignore_targets[@]}"; do
-        echo "$ignore ${target_contents[@]}"
         target_contents=("${target_contents[@]/$ignore}")
-        echo " ==> ${target_contents[@]}"
     done
 
     for target in "${target_contents[@]}"; do
@@ -93,4 +91,4 @@ ignore_targets=()
 get_ignore_targets
 get_target_files "$target_dir"
 
-zip -r "$zip_file" "${target_files[@]}"
+zip -q "$zip_file" "${target_files[@]}"
