@@ -22,21 +22,12 @@ echo_err()
 
 get_ignore_targets()
 {
-    local ignore_count=1
-
-    while read -r line; do
-        ignore_targets+=("$target_dir/$line")
-    done < "$pak_file"
-}
-
-get_target_files()
-{
     if [ -z "$1" ]; then return 0; fi
 
     local target_contents=("$1"/*)
     local sub_dirs=()
 
-    for ignore in "${ignore_targets[@]}"; do
+    for ignore in "${ignored_targets[@]}"; do
         target_contents=("${target_contents[@]/$ignore}")
     done
 
@@ -51,12 +42,35 @@ get_target_files()
 
     for dir in "$sub_dirs"; do
         sub_dirs=("${sub_dirs[@]/$dir}")
-        get_target_files "$dir"
+        get_ignore_targets "$dir"
     done
 }
 
+get_sub_targets()
+{
+    dir_contents=("$1"/*)
+    for sub_target in "${dir_contents[@]}"; do
+        if [ -d "$sub_target" ]; then
+            get_sub_targets "$sub_target"
+            continue
+        fi
+        target_files+=("$sub_target")
+    done
+}
+
+get_include_targets()
+{
+    while read -r line; do
+        if [ ! -e "$line" ]; then continue; fi
+
+        if [ -f "$line" ]; then target_files+=("$line"); fi
+
+        if [ -d "$line" ]; then get_sub_targets "$line"; fi
+    done < "$pak_file"
+}
+
 # parse options and arguments
-opts=$(getopt -qo "d:" --long "help,dest:,ignore-file:,ignore,include": -- "$@")
+opts=$(getopt -qo "d:" --long "help,dest:,pak-file:,ignore,include" -- "$@")
 eval set -- "${opts}"
 
 while :; do
@@ -66,13 +80,13 @@ while :; do
         -d | --dest) dest="$2"
             shift
             ;;
-        --ignore-file) pak_file="$2"
+        --pak-file) pak_file="$2"
             shift
             ;;
-        --ignore) ignore=0
+        --ignore) mode="ignore"
             pak_file=".pakignore"
             ;;
-        --include) include=0
+        --include) mode="include"
             pak_file=".pakinclude"
             ;;
         --) shift
@@ -86,6 +100,7 @@ done
 # # # # # # # # # # #
 # Initialize values #
 # # # # # # # # # # #
+mode="${mode:-ignore}"
 target_dir="${target_dir:-.}"
 pak_file="$target_dir/${pak_file:-.pakignore}"
 dest="${dest:-.}"
@@ -95,15 +110,28 @@ else
     zip_file="$dest/${target_dir}_pak.zip"
 fi
 
-# # # # # # # # # # # # # #
-# Check for value sanity  #
-# # # # # # # # # # # # # #
+# # # # # # # # # # # # #
+# Check for file sanity #
+# # # # # # # # # # # # #
 if [ ! -d "$target_dir" ]; then echo_err "no such directory '$1'" 1; fi
-if [ ! -f "$pak_file" ]; then echo_err "no file '$pak_file'" 1; fi
+if [ ! -f "$pak_file" ]; then echo_err "no such file '$pak_file'" 1; fi
 
 target_files=()
-ignore_targets=()
-get_ignore_targets
-get_target_files "$target_dir"
 
+# # # # # # # #
+# Get targets #
+# # # # # # # #
+if [ "$mode" == "ignore" ]; then
+    ignored_targets=()
+    while read -r line; do ignored_targets+=("$target_dir/$line"); done <"$pak_file"
+    get_ignore_targets "$target_dir"
+elif [ "$mode" == "include" ]; then
+    get_include_targets
+fi
+
+# # # # # # # #
+# Zip targets #
+# # # # # # # #
 zip -q "$zip_file" "${target_files[@]}"
+
+exit "$?"
