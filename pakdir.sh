@@ -20,7 +20,7 @@ echo_err()
     if [ -z "$2" ]; then exit 1; else exit "$2"; fi
 }
 
-get_ignore_targets()
+get_pakignore_targets()
 {
     if [ -z "$1" ]; then return 0; fi
 
@@ -42,7 +42,7 @@ get_ignore_targets()
 
     for dir in "$sub_dirs"; do
         sub_dirs=("${sub_dirs[@]/$dir}")
-        get_ignore_targets "$dir"
+        get_pakignore_targets "$dir"
     done
 }
 
@@ -58,7 +58,7 @@ get_sub_targets()
     done
 }
 
-get_include_targets()
+get_pakinclude_targets()
 {
     while read -r line; do
         if [ ! -e "$line" ]; then continue; fi
@@ -104,6 +104,7 @@ mode="${mode:-ignore}"
 target_dir="${target_dir:-.}"
 pak_file="$target_dir/${pak_file:-.pakignore}"
 dest="${dest:-.}"
+target_files=()
 if [ "$target_dir" == "." ]; then
     zip_file="$dest/$(basename $(pwd))_pak.zip";
 else
@@ -116,17 +117,21 @@ fi
 if [ ! -d "$target_dir" ]; then echo_err "no such directory '$1'" 1; fi
 if [ ! -f "$pak_file" ]; then echo_err "no such file '$pak_file'" 1; fi
 
-target_files=()
-
 # # # # # # # #
 # Get targets #
 # # # # # # # #
 if [ "$mode" == "ignore" ]; then
-    ignored_targets=()
-    while read -r line; do ignored_targets+=("$target_dir/$line"); done <"$pak_file"
-    get_ignore_targets "$target_dir"
+    ignored_targets[0]=".pakignore"
+    ignored_targets[1]=".pakinclude"
+    if [ -z "$pak_file" ]; then ignore_targets[2]="$pak_file"; fi
+
+    while read -r line; do
+        ignored_targets+=("$target_dir/$line")
+    done <"$pak_file"
+
+    get_pakignore_targets "$target_dir"
 elif [ "$mode" == "include" ]; then
-    get_include_targets
+    get_pakinclude_targets
 fi
 
 # # # # # # # #
