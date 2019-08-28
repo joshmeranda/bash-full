@@ -1,8 +1,6 @@
 # bash-ful
 A collection of useful bash scripts.
 
-Before running make sure proper execute permissions are allowed for each script.
-
 ## modtouch
 Create a file with specified permissions. Can be run in interactive mode, and will not overwrite a file unless told to do so.
 
