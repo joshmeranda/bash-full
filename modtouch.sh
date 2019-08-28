@@ -1,5 +1,5 @@
-#!/bin/bash
-program_name="$(basename $0)"
+#!/bin/env bash
+program_name="$(basename "$0")"
   
 usage()
 {
@@ -17,7 +17,7 @@ if [ "$#" -eq 1 ]; then
     exit 0
 fi
 
-overwrite=0
+overwrite=false
 
 while true; do
     case "$1" in
@@ -26,12 +26,12 @@ while true; do
             exit 0
             ;;
         -o | --overwrite)
-            overwrite=1
+            overwrite=true
             ;;
         --) shift
             mode="$1"
             shift
-            target_files="$@"
+            target_files=("$@")
             break
             ;;
     esac
@@ -39,15 +39,17 @@ while true; do
     shift
 done
 
-for file in "$target_files"; do
-    if [ -e "$file" ]; then exists=true; else exists=false; fi
+# If no overwrite remove existing files
+if [ "$overwrite" = true ]; then
+    for file in "${target_files[@]}"; do
+        if [ -f "$file" ]; then
+            echo "$0: $1 cannot be created, already exists"
+            target_files=("${target_files[@]/$file}")
+        fi
+    done
+fi
 
-    # if overwrite or file does not exists create
-    if [[ "$overwrite" -eq 1 || ! -e "$file" ]]; then
-        echo "$overwrite" "$exists"
-        echo > "$file"
-        chmod "$mode" "$file"
-    fi
-done
+touch "${target_files[@]}"
+chmod "$mode" "${target_files[@]}"
 
 exit "$?"

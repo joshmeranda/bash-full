@@ -1,11 +1,12 @@
-#!/bin/bash
+#!/bin/env bash
 
-program_name="$(basename $0)"
+program_name="$(basename "$0")"
 
 usage()
 {
     echo "Usage: #program_name [OPTIONS] SOURCE... "
-    echo "  -d --dest       specify the destination for SOURCE contents. If not"
+    echo "     --help       Display this help text"
+    echo "  -d --dest       Specify the destination for SOURCE contents. If not"
     echo "                  specified, deaults to './'"
     exit 0
 }
@@ -24,27 +25,27 @@ while true; do
                 shift
                ;;
         --) shift
-            source="$@"
+            source=("$@")
             break
             ;;
     esac
     shift
 done
 
-if [ -z "$dest" ]; then dest="./"; fi
+# Ensure that a destination is specified
+if [ -z "$dest" ];
+    then dest="./"
+else
+    mkdir "$dest"
+fi
 
-if [ ! -d "$dest" ]; then mkdir "$dest"; fi
-
-for target in "$source"; do
-    if [ ! -f "$target" ] && [ ! -d "$target" ]; then
-        echo "$program_name: no such file or directory '$target'"
-        source="${source[@]/$target}"
-    else
-        cp_targets="$cp_targets $target/."
-    fi
+drain_targets=()
+for target in "${source[@]}"; do
+    for file in "$target"/*; do
+        drain_targets=("${drain_targets[@]}" "$file")
+    done
 done
 
-cp -a "$cp_targets" "$dest"
-rm -r "$source"
+mv "${drain_targets[@]}" "$dest"
 
 exit "$?"

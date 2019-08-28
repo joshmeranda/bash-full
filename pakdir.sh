@@ -1,5 +1,5 @@
-#!/bin/bash
-program_name="$(basename $0)"
+#!/bin/env bash
+program_name="$(basename "$0")"
 
 usage()
 {
@@ -40,7 +40,7 @@ get_pakignore_targets()
         target_files+=("$target")
     done
 
-    for dir in "$sub_dirs"; do
+    for dir in "${sub_dirs[@]}"; do
         sub_dirs=("${sub_dirs[@]/$dir}")
         get_pakignore_targets "$dir"
     done
@@ -106,7 +106,7 @@ pak_file="$target_dir/${pak_file:-.pakignore}"
 dest="${dest:-.}"
 target_files=()
 if [ "$target_dir" == "." ]; then
-    zip_file="$dest/$(basename $(pwd))_pak.zip";
+    zip_file="$dest/$(basename "$(pwd)")_pak.zip";
 else
     zip_file="$dest/${target_dir}_pak.zip"
 fi
@@ -123,7 +123,7 @@ if [ ! -f "$pak_file" ]; then echo_err "no such file '$pak_file'" 1; fi
 if [ "$mode" == "ignore" ]; then
     ignored_targets[0]=".pakignore"
     ignored_targets[1]=".pakinclude"
-    if [ -z "$pak_file" ]; then ignore_targets[2]="$pak_file"; fi
+    if [ -z "$pak_file" ]; then ignored_targets[2]="$pak_file"; fi
 
     while read -r line; do
         ignored_targets+=("$target_dir/$line")

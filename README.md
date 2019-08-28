@@ -1,5 +1,5 @@
 # bash-ful
-A collection of usefual bash scripts.
+A collection of useful bash scripts.
 
 Before running make sure proper execute permissions are allowed for each script.
 
