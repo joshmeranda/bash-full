@@ -11,3 +11,6 @@ Copy the content of source directories into dest. If no dest specified drains so
 
 ## pakdir
 Pack contents of directory into a zip file according to contents of 'ignore' and 'include' files, similar to gitignore.
+
+## mktest
+Create a test directory for testing file manipulation scripts.
