@@ -1,8 +1,6 @@
 # bash-ful
 A collection of useful bash scripts.
 
-Before running make sure proper execute permissions are allowed for each script.
-
 ## modtouch
 Create a file with specified permissions. Can be run in interactive mode, and will not overwrite a file unless told to do so.
 
@@ -11,3 +9,6 @@ Copy the content of source directories into dest. If no dest specified drains so
 
 ## pakdir
 Pack contents of directory into a zip file according to contents of 'ignore' and 'include' files, similar to gitignore.
+
+## mktest
+Create a test directory for testing file manipulation scripts.
