@@ -17,7 +17,10 @@ echo_err() {
     echo -e "$SCRIPT_NAME: $1" 2>&1
 }
 
-if [ "$#" -eq 0 ]; then echo_err "missing operands.\nTry '$SCRIPT_NAME --help' for help"; exit 1; fi
+if [ "$#" -eq 0 ]; then
+    echo_err "missing operands.\nTry '$SCRIPT_NAME --help' for help"
+    exit 1
+fi
 
 # Parse arguments.
 while [ "$#" -gt 0 ]; do

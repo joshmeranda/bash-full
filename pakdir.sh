@@ -1,21 +1,25 @@
 #!/bin/env bash
-program_name="$(basename "$0")"
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Package all a directory according to the 'pakignore' or '.pakinclude' #
+# files.                                                                #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+SCRIPT_NAME="$(basename "$0")"
 
 usage()
 {
-echo "Usage: $program_name [options] SOURCE [zip_file]"
-echo "     --help                  diaplay this help text."
-echo "  -d --dest                  the destination for the created zip file."
-echo "     --ignore-file=[FILE]    use a specific pakignore file."
-echo
-echo "  If no zipfile is specified, the zip created will be nammed after SOURCE"
-echo "  followed by '_pak.zip'."
-exit 0
+echo "Usage: $SCRIPT_NAME [options] SOURCE [zip_file]
+     --help                  diaplay this help text.
+  -d --dest                  the destination for the created zip file.
+     --ignore-file=[FILE]    use a specific pakignore file.
+
+If no zipfile is specified, the zip created will be nammed after SOURCE
+followed by '_pak.zip'."
 }
 
 echo_err()
 {
-    echo "$program_name: $1" 1>&2
+    echo "$SCRIPT_NAME: $1" 1>&2
 
     if [ -z "$2" ]; then exit 1; else exit "$2"; fi
 }
@@ -76,6 +80,7 @@ eval set -- "${opts}"
 while :; do
     case "$1" in
         --help) usage
+            exit 0
             ;;
         -d | --dest) dest="$2"
             shift

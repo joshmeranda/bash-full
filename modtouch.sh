@@ -1,11 +1,14 @@
 #!/bin/env bash
-program_name="$(basename "$0")"
+# # # # # # # # # # # # # # # # # # # # # # #
+# Create a file with specified permissions. #
+# # # # # # # # # # # # # # # # # # # # # # #
+SCRIPT_NAME="$(basename "$0")"
   
 usage()
 {
-echo "Usage: $program_name [-o] OCTAL-MODE [FILE]..."
-echo "  -o --overwrite             specify that existing files should be"
-echo "                             overwritten if file of the same name exists"
+echo "Usage: $SCRIPT_NAME [-o] OCTAL-MODE [FILE]...
+-o --overwrite             specify that existing files should be
+                             overwritten if file of the same name exists"
 }
 
 # parse options and arguments
