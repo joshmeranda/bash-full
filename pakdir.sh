@@ -1,27 +1,26 @@
 #!/bin/env bash
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Package all a directory according to the 'pakignore' or '.pakinclude' #
-# files.                                                                #
+# Package all a directory according to the '.pak' file.                 #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
 SCRIPT_NAME="$(basename "$0")"
 
 usage()
 {
-echo "Usage: $SCRIPT_NAME [options] SOURCE [zip_file]
+#TODO update todo
+echo "Usage: $SCRIPT_NAME [options] DIR
      --help                  diaplay this help text.
   -d --dest                  the destination for the created zip file.
-     --ignore-file=[FILE]    use a specific pakignore file.
+  -p --pak-file=[FILE]       use a specific pak file.
+     --ignore                ignore specified paths.
+     --include               include specified paths.
 
-If no zipfile is specified, the zip created will be nammed after SOURCE
+If no zipfile is specified, the zip created will be nammed after DIR
 followed by '_pak.zip'."
 }
 
 echo_err()
 {
     echo "$SCRIPT_NAME: $1" 1>&2
-
-    if [ -z "$2" ]; then exit 1; else exit "$2"; fi
 }
 
 get_pakignore_targets()
@@ -74,7 +73,7 @@ get_pakinclude_targets()
 }
 
 # parse options and arguments
-opts=$(getopt -qo "d:" --long "help,dest:,pak-file:,ignore,include" -- "$@")
+opts=$(getopt -qo "z:" --long "help,zip:,pak-file:,ignore,include" -- "$@")
 eval set -- "${opts}"
 
 while :; do
@@ -82,17 +81,17 @@ while :; do
         --help) usage
             exit 0
             ;;
-        -d | --dest) dest="$2"
+        -z | --zip) zip_file="$2"
             shift
             ;;
         --pak-file) pak_file="$2"
             shift
             ;;
         --ignore) mode="ignore"
-            pak_file=".pakignore"
+            mode="ignore"
             ;;
         --include) mode="include"
-            pak_file=".pakinclude"
+            mode="include"
             ;;
         --) shift
             target_dir="$1"
@@ -102,46 +101,31 @@ while :; do
     shift
 done
 
-# # # # # # # # # # #
-# Initialize values #
-# # # # # # # # # # #
+# Initialize values
 mode="${mode:-ignore}"
 target_dir="${target_dir:-.}"
-pak_file="$target_dir/${pak_file:-.pakignore}"
-dest="${dest:-.}"
+pak_file="$target_dir/${pak_file:-.pak}"
 target_files=()
-if [ "$target_dir" == "." ]; then
-    zip_file="$dest/$(basename "$(pwd)")_pak.zip";
-else
-    zip_file="$dest/${target_dir}_pak.zip"
-fi
+zip_file="${zip_file:-"$(basename "$(pwd)")_pak.zip"}"
 
-# # # # # # # # # # # # #
-# Check for file sanity #
-# # # # # # # # # # # # #
-if [ ! -d "$target_dir" ]; then echo_err "no such directory '$1'" 1; fi
-if [ ! -f "$pak_file" ]; then echo_err "no such file '$pak_file'" 1; fi
+# Check for file sanity
+if [ ! -d "$target_dir" ]; then echo_err "no such directory '$1'"; exit 1; fi
+if [ ! -f "$pak_file" ]; then echo_err "no such file '$pak_file'"; exit 1; fi
 
-# # # # # # # #
-# Get targets #
-# # # # # # # #
+# Get targets
 if [ "$mode" == "ignore" ]; then
-    ignored_targets[0]=".pakignore"
-    ignored_targets[1]=".pakinclude"
-    if [ -z "$pak_file" ]; then ignored_targets[2]="$pak_file"; fi
+    ignored_targets[0]="$pak_file"
 
     while read -r line; do
         ignored_targets+=("$target_dir/$line")
-    done <"$pak_file"
+    done < "$pak_file"
 
     get_pakignore_targets "$target_dir"
 elif [ "$mode" == "include" ]; then
     get_pakinclude_targets
 fi
 
-# # # # # # # #
-# Zip targets #
-# # # # # # # #
-zip -q "$zip_file" "${target_files[@]}"
+# create zip file
+zip "$zip_file" "${target_files[@]}"
 
 exit "$?"
