@@ -1,12 +1,16 @@
 #!/bin/env bash
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Merge and delete a branch all at once. Allows option to delete remote #
-# branch as well. g(it) merge d(elete)                                                       #
+# branch as well. g(it) merge d(elete)                                  #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 SCRIPT_NAME="$(basename "$0")"
 
 usage() {
-echo "Usage: $SCRIPT_NAME [OPTIONS] branch name"
+echo "Usage: $SCRIPT_NAME [OPTIONS] <branch>
+     --help             Display this help text.
+  -r --remote-branch    Specify to delete the remote branch on push.
+  -l --local-only       Specify to keep all changes local and noot push.
+"
 }
 
 echo_err() {
@@ -18,10 +22,11 @@ if [ "$#" -eq 0 ]; then
     exit 1
 fi
 
-opts=$(getopt -o "r" --long "help,remote": -- "$@")
+opts=$(getopt -o "rl" --long "help,remote-branch,local-only": -- "$@")
 eval set -- "${opts}"
 
 remote=0
+stayLocal=0
 
 while true; do
     case "$1" in
@@ -29,8 +34,11 @@ while true; do
             usage
             exit 0
             ;;
-        -r | --remote)
+        -r | --remote-branch)
             remote=1
+            ;;
+        -l | --local-only)
+            stayLocal=1
             ;;
         --) shift
             branch="$1"
@@ -47,9 +55,10 @@ echo "=== MERGING ==="
 git merge "$branch"
 
 echo "=== Pushing ==="
+
 if [ "$remote" -eq 1 ]; then
     git push --delete origin "$branch"
-else
+elif [ "$stayLocal" -eq 0 ]; then
     git push
 fi
 
