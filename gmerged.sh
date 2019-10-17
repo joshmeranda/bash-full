@@ -44,6 +44,7 @@ while true; do
             branch="$1"
             break
     esac
+    shift
 done
 
 if [ -z "$branch" ]; then
@@ -54,12 +55,13 @@ fi
 echo "=== MERGING ==="
 git merge "$branch"
 
-echo "=== Pushing ==="
-
-if [ "$remote" -eq 1 ]; then
-    git push --delete origin "$branch"
-elif [ "$stayLocal" -eq 0 ]; then
-    git push
+if [ "$stayLocal" -eq 0 ]; then
+    echo "=== Pushing ==="
+    if [ "$remote" -eq 1 ]; then
+        git push --delete origin "$branch"
+    else
+        git push
+    fi
 fi
 
 echo "=== DELETING ==="
