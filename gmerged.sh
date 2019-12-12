@@ -52,6 +52,9 @@ if [ -z "$branch" ]; then
     exit 1
 fi
 
+# exit on command error
+set -e
+
 echo "=== MERGING ==="
 git merge "$branch"
 
