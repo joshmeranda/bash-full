@@ -7,60 +7,25 @@
 SCRIPT_NAME="$(basename "$0")"
 
 usage() {
-echo "Usage: $SCRIPT_NAME [OPTIONS] SOURCE...
-     --help       Display this help text
-  -d --dest       Specify the destination for SOURCE contents. If not
-                  specified, defaults to './'.
-"
+echo "Usage: $SCRIPT_NAME SOURCE... DEST"
 }
 
 echo_err() {
     echo -e "$SCRIPT_NAME: $1" 2>&1
 }
 
-if [ "$#" -eq 0 ]; then
-    echo_err "missing operands.\nTry '$SCRIPT_NAME --help' for help"
+if [ "$#" -lt 2 ]; then
+    echo_err "missing operands."
+    usage
     exit 1;
 fi
 
-# Parse arguments.
-while true; do
-    case "$1" in
-        --help)
-            usage
-            ;;
-        -d | --dest)
-            dest="$2"
-            shift
-           ;;
-        *)
-            source=("$@")
-            echo "=== 000 ==="
-            echo "${source[@]}"
-            break
-            ;;
-    esac
+sources=("$@")
+dest="${sources[-1]}"
 
-    shift
-done
+unset 'sources[${#sources[@]} - 1]'
 
-# Ensure that the proper destination direcory exists and is not a regular file
-if [ -z "$dest" ]; then
-    dest="./"
-elif [ -f "$dest" ]; then
-    echo_err "Cannot drain directory into a file."
-    exit 1
-elif [ ! -d "$dest" ]; then
-    mkdir "$dest"
-fi
+find "${sources[@]}" -mindepth 1 -maxdepth 1 -ignore_readdir_race -exec \
+    mv --verbose --target-directory "$dest" '{}' + 2>/dev/null
 
-# Drain all source directories into the target.
-for target in "${source[@]}"; do
-    echo "$target"/*
-
-    if mv "$target"/* "$dest"; then
-        rm -r "$target"
-    fi
-done
-
-exit "$?"
+rmdir --verbose "${sources[@]}"

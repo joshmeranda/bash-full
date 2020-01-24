@@ -6,9 +6,10 @@ SCRIPT_NAME="$(basename "$0")"
   
 usage()
 {
-echo "Usage: $SCRIPT_NAME [-o] OCTAL-MODE [FILE]...
--o --overwrite             specify that existing files should be
-                             overwritten if file of the same name exists"
+echo "Usage: $SCRIPT_NAME [-o] OCTAL-MODE FILE [FILE ...]
+  -o --overwrite    specify that existing files should be overwritten if file
+                    of the same name exists
+"
 }
 
 # parse options and arguments
@@ -17,19 +18,17 @@ eval set -- "${opts}"
 
 if [ "$#" -eq 1 ]; then
     usage
-    exit 0
+    exit 1
 fi
 
 overwrite=false
 
 while true; do
     case "$1" in
-        --help)
-            usage
+        --help) usage
             exit 0
             ;;
-        -o | --overwrite)
-            overwrite=true
+        -o | --overwrite) overwrite=true
             ;;
         --) shift
             mode="$1"

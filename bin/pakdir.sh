@@ -6,18 +6,13 @@ SCRIPT_NAME="$(basename "$0")"
 
 usage()
 {
-#TODO update todo
-echo "Usage: $SCRIPT_NAME [options] DIR
-     --help                  diaplay this help text.
-  -d --dest                  the destination for the created zip file.
-  -p --pak-file=[FILE]       use a specific pak file.
-     --ignore                ignore specified paths.
-     --include               include specified paths.
-  -g --git                   pak a directory according according to a '.gitignore' file.
-  -z --zip=[FILE]            the name of the resulting zip file.
-
-If no zipfile is specified, the zip created will be nammed after DIR
-followed by '_pak.zip'."
+echo "Usage: $SCRIPT_NAME [options] [TARGET] [ZIP]
+     --help              diaplay this help text.
+  -p --pak-file=[FILE]   use a specific pak file.
+     --include           include specified paths.
+  -g --git               pak a directory according according to a '.gitignore'
+                         file.
+"
 }
 
 echo_err()
@@ -53,8 +48,28 @@ get_pak_targets()
     fi
 }
 
+pak_git()
+{
+    if [ ! -e ".git" ]; then
+        echo_err "Not in a git repository."
+        exit 1
+    fi
+
+    zip "$zip_file" $(get_git_targets) -x "$PWD/.git"
+}
+
+pak_dir()
+{
+    if [ ! -e "$pak_file" ]; then
+        echo_err "Could not find pak file '$pak_file'."
+        exit 1
+    fi
+
+    zip "$zip_file" $(get_pak_targets) -x "$PWD/$pak_file"
+}
+
 # parse options and arguments
-opts=$(getopt -qo "z:g" --long "help,zip:,pak-file:,ignore,include,git" -- "$@")
+opts=$(getopt -qo "gp:" --long "help,include,git,pak-file:" -- "$@")
 eval set -- "${opts}"
 
 pak_file=".pak"
@@ -65,9 +80,6 @@ while [ "$#" -ne 0 ]; do
     case "$1" in
         --help) usage
             exit 0
-            ;;
-        -z | --zip) zip_file="$2"
-            shift
             ;;
         --pak-file) pak_file="$2"
             shift
@@ -84,11 +96,11 @@ while [ "$#" -ne 0 ]; do
 done
 
 if [ -n "$1" ]; then target_dir="$1"; fi
-
+if [ -n "$2" ]; then zip_file="$2"; fi
 if [ -z "$zip_file" ]; then zip_file="$(basename "$(realpath "$target_dir")").zip"; fi
 
 if [ "$mode" == "git" ]; then
-    zip "$zip_file" $(get_git_targets) -x "$PWD/.git"
+    pak_git
 else
-    zip "$zip_file" $(get_pak_targets) -x "$PWD/$pak_file"
+    pak_dir
 fi

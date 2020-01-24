@@ -6,10 +6,10 @@
 SCRIPT_NAME="$(basename "$0")"
 
 usage() {
-echo "Usage: $SCRIPT_NAME [OPTIONS] <branch>
-     --help             Display this help text.
-  -r --remote-branch    Specify to delete the remote branch on push.
-  -l --local-only       Specify to keep all changes local and noot push.
+echo "Usage: $SCRIPT_NAME [OPTIONS] BRANCH
+     --help      display this help text.
+  -r --remove    delete the remote branch on push.
+  -p --push      push to remote after merge.
 "
 }
 
@@ -22,11 +22,11 @@ if [ "$#" -eq 0 ]; then
     exit 1
 fi
 
-opts=$(getopt -o "rl" --long "help,remote-branch,local-only": -- "$@")
+opts=$(getopt -o "rp" --long "help,remove,push": -- "$@")
 eval set -- "${opts}"
 
-remote=0
-stayLocal=0
+remove=0
+push=0
 
 while true; do
     case "$1" in
@@ -34,11 +34,11 @@ while true; do
             usage
             exit 0
             ;;
-        -r | --remote-branch)
-            remote=1
+        -r | --remove)
+            remove=1
             ;;
-        -l | --local-only)
-            stayLocal=1
+        -p | --push)
+            push=1
             ;;
         --) shift
             branch="$1"
@@ -58,9 +58,9 @@ set -e
 echo "=== MERGING ==="
 git merge "$branch"
 
-if [ "$stayLocal" -eq 0 ]; then
+if [ "$push" -eq 1 ]; then
     echo "=== Pushing ==="
-    if [ "$remote" -eq 1 ]; then
+    if [ "$remove" -eq 1 ]; then
         git push --delete origin "$branch"
     else
         git push
