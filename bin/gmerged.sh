@@ -26,7 +26,6 @@ opts=$(getopt -o "rp" --long "help,remove,push": -- "$@")
 eval set -- "${opts}"
 
 remove=0
-push=0
 
 while true; do
     case "$1" in
@@ -58,7 +57,7 @@ set -e
 echo "=== MERGING ==="
 git merge "$branch"
 
-if [ "$push" -eq 1 ]; then
+if [ -n "$push" ]; then
     echo "=== Pushing ==="
     if [ "$remove" -eq 1 ]; then
         git push --delete origin "$branch"
