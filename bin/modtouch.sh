@@ -13,7 +13,7 @@ echo "Usage: $SCRIPT_NAME [-o] OCTAL-MODE FILE [FILE ...]
 }
 
 # parse options and arguments
-opts=$(getopt -o "o" --long "help,overwrite": -- "$@")
+opts=$(getopt -o "oe" --long "help,overwrite,edit": -- "$@")
 eval set -- "${opts}"
 
 if [ "$#" -eq 1 ]; then
@@ -21,14 +21,14 @@ if [ "$#" -eq 1 ]; then
     exit 1
 fi
 
-overwrite=false
-
-while true; do
+while :; do
     case "$1" in
         --help) usage
             exit 0
             ;;
-        -o | --overwrite) overwrite=true
+        -o | --overwrite) overwrite=1
+            ;;
+        -e | --edit) edit=1
             ;;
         --) shift
             mode="$1"
@@ -42,7 +42,7 @@ while true; do
 done
 
 # If no overwrite remove existing files
-if [ "$overwrite" = true ]; then
+if [ "$overwrite" ]; then
     for file in "${target_files[@]}"; do
         if [ -f "$file" ]; then
             echo "$0: $1 cannot be created, already exists"
@@ -53,5 +53,7 @@ fi
 
 touch "${target_files[@]}"
 chmod "$mode" "${target_files[@]}"
+
+if [ "$edit" ]; then nano "${target_files[@]}"; fi
 
 exit "$?"
