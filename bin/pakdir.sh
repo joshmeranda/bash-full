@@ -55,7 +55,7 @@ pak_git()
         exit 1
     fi
 
-    zip "$zip_file" $(get_git_targets) -x "$PWD/.git"
+    zip "$zip_file" $(get_git_targets)
 }
 
 pak_dir()
