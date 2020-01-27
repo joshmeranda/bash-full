@@ -10,6 +10,7 @@ echo "Usage: $SCRIPT_NAME [options] [TARGET] [ZIP]
      --help              diaplay this help text.
   -p --pak-file=[FILE]   use a specific pak file.
      --include           include specified paths.
+     --no-ignore-pak     include the pak file in the resulting archive.
   -g --git               pak a directory according according to a '.gitignore'
                          file.
 "
@@ -65,11 +66,15 @@ pak_dir()
         exit 1
     fi
 
-    zip "$zip_file" $(get_pak_targets) -x "$PWD/$pak_file"
+	if [ "$noignore" ]; then
+	    zip "$zip_file" $(get_pak_targets)
+	else
+	    zip "$zip_file" $(get_pak_targets) -x "$PWD/$pak_file"
+	fi
 }
 
 # parse options and arguments
-opts=$(getopt -qo "gp:" --long "help,include,git,pak-file:" -- "$@")
+opts=$(getopt -qo "gp:" --long "help,include,git,pak-file:,no-ignore-pak" -- "$@")
 eval set -- "${opts}"
 
 pak_file=".pak"
@@ -87,6 +92,8 @@ while [ "$#" -ne 0 ]; do
         --include) mode="include"
             ;;
         -g | --git) mode="git"
+            ;;
+        --no-ignore-pak) noignore=0
             ;;
         *) shift
             break

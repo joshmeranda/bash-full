@@ -43,6 +43,7 @@ Usage: pakdir.sh [options] [TARGET] [ZIP]
      --help              diaplay this help text.
   -p --pak-file=[FILE]   use a specific pak file.
      --include           include specified paths.
+     --no-ignore-pak     include the pak file in the resulting archive.
   -g --git               pak a directory according according to a '.gitignore'
                          file.
 ```
