@@ -14,6 +14,8 @@ echo_err() {
     echo -e "$SCRIPT_NAME: $1" 2>&1
 }
 
+if [ "$1" == "--help" ]; then usage; exit 1; fi
+
 if [ "$#" -lt 2 ]; then
     echo_err "missing operands."
     usage
