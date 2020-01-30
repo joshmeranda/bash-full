@@ -13,6 +13,8 @@ echo "Usage: $SCRIPT_NAME [options] [TARGET] [ZIP]
      --no-ignore-pak     include the pak file in the resulting archive.
   -g --git               pak a directory according according to a '.gitignore'
                          file.
+     --tarball           package as a tarball filtered through gzip instead of
+                         a simple compressed archive.
 "
 }
 
@@ -51,30 +53,37 @@ get_pak_targets()
 
 pak_git()
 {
-    if [ ! -e ".git" ]; then
+    if [ -z "$(git rev-parse --git-dir)" ]; then
         echo_err "Not in a git repository."
         exit 1
     fi
 
-    zip "$zip_file" $(get_git_targets)
+    if [ -n "$tarball" ]; then
+        tar --create --verbose --gzip --file "$archive" $(get_git_targets)
+    else
+        zip "$archive" $(get_git_targets)
+    fi
 }
 
 pak_dir()
 {
-    if [ ! -e "$pak_file" ]; then
-        echo_err "Could not find pak file '$pak_file'."
-        exit 1
+	  if [ "$noignore" ]; then
+	      if [ -n "$tarball" ]; then
+	          tar --create --verbose --gzip --file "$archive" $(get_pak_targets)
+        else
+            zip "$archive" $(get_pak_targets)
+        fi
+    else
+        if [ -n "$tarball" ]; then
+	          tar --create --gzip --verbose --file "$archive" $(get_pak_targets) --exclude "$PWD/$pak_file"
+        else
+            zip "$archive" $(get_pak_targets) -x "$PWD/$pak_file"
+        fi
     fi
-
-	if [ "$noignore" ]; then
-	    zip "$zip_file" $(get_pak_targets)
-	else
-	    zip "$zip_file" $(get_pak_targets) -x "$PWD/$pak_file"
-	fi
 }
 
 # parse options and arguments
-opts=$(getopt -qo "gp:" --long "help,include,git,pak-file:,no-ignore-pak" -- "$@")
+opts=$(getopt -qo "gp:" --long "help,include,git,pak-file:,no-ignore-pak,tarball" -- "$@")
 eval set -- "${opts}"
 
 pak_file=".pak"
@@ -95,6 +104,8 @@ while [ "$#" -ne 0 ]; do
             ;;
         --no-ignore-pak) noignore=0
             ;;
+        --tarball) tarball=0
+            ;;
         *) shift
             break
             ;;
@@ -103,11 +114,16 @@ while [ "$#" -ne 0 ]; do
 done
 
 if [ -n "$1" ]; then target_dir="$1"; fi
-if [ -n "$2" ]; then zip_file="$2"; fi
-if [ -z "$zip_file" ]; then zip_file="$(basename "$(realpath "$target_dir")").zip"; fi
+if [ -n "$2" ]; then archive="$2"; fi
+if [ -z "$archive" ]; then archive="$(basename "$(realpath "$target_dir")")"; fi
+if [ -n "$tarball" ]; then archive="${archive}.tar.gz"; else archive="${tarball}.zip"; fi
 
 if [ "$mode" == "git" ]; then
     pak_git
 else
+    if [ ! -e "$pak_file" ]; then
+        echo_err "Could not find pak file '$pak_file'."
+        exit 1
+    fi
     pak_dir
 fi

@@ -46,4 +46,6 @@ Usage: pakdir.sh [options] [TARGET] [ZIP]
      --no-ignore-pak     include the pak file in the resulting archive.
   -g --git               pak a directory according according to a '.gitignore'
                          file.
+     --tarball           package as a tarball filtered through gzip instead of
+                         a simple compressed archive.
 ```
