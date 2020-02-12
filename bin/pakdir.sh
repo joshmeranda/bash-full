@@ -6,7 +6,7 @@ SCRIPT_NAME="$(basename "$0")"
 
 usage()
 {
-echo "Usage: $SCRIPT_NAME [options] [TARGET] [ZIP]
+echo "Usage: $SCRIPT_NAME [options] [TARGET] [ARCHIVE]
      --help              diaplay this help text.
   -p --pak-file=[FILE]   use a specific pak file.
      --include           include specified paths.
@@ -116,7 +116,7 @@ done
 if [ -n "$1" ]; then target_dir="$1"; fi
 if [ -n "$2" ]; then archive="$2"; fi
 if [ -z "$archive" ]; then archive="$(basename "$(realpath "$target_dir")")"; fi
-if [ -n "$tarball" ]; then archive="${archive}.tar.gz"; else archive="${tarball}.zip"; fi
+if [ -n "$tarball" ]; then archive="${archive}.tar.gz"; else archive="$archive.zip"; fi
 
 if [ "$mode" == "git" ]; then
     pak_git
