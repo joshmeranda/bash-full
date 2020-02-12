@@ -7,7 +7,7 @@ usage()
 {
 echo "Uasge: $SCRIPT_NAME [ -p url ] PROFILE
      --help             show this help text.
-  -p --ping=PROFILE     specify the netctl profile to restart.
+  -p --ping=HOST        specify the ping target when checking connection.
 "
 }
 
