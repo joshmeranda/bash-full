@@ -6,9 +6,10 @@ SCRIPT_NAME="$(basename "$0")"
   
 usage()
 {
-echo "Usage: $SCRIPT_NAME [-o] OCTAL-MODE FILE [FILE ...]
+echo "Usage: $SCRIPT_NAME [-oe] OCTAL-MODE FILE [FILE ...]
   -o --overwrite    specify that existing files should be overwritten if file
                     of the same name exists
+  -e --edit         open the newly created file in nano
 "
 }
 

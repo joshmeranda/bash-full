@@ -75,9 +75,9 @@ pak_dir()
         fi
     else
         if [ -n "$tarball" ]; then
-	          tar --create --gzip --verbose --file "$archive" $(get_pak_targets) --exclude "$PWD/$pak_file"
+	          tar --create --gzip --verbose --file "$archive" $(get_pak_targets) --exclude "$pak_file"
         else
-            zip "$archive" $(get_pak_targets) -x "$PWD/$pak_file"
+            zip "$archive" $(get_pak_targets) -x "$pak_file"
         fi
     fi
 }
@@ -88,7 +88,7 @@ eval set -- "${opts}"
 
 pak_file=".pak"
 mode="ignore"
-target_dir="$PWD"
+target_dir="."
 
 while [ "$#" -ne 0 ]; do
     case "$1" in
