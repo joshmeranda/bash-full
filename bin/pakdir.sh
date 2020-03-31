@@ -6,9 +6,9 @@ SCRIPT_NAME="$(basename "$0")"
 
 usage()
 {
-echo "Usage: $SCRIPT_NAME [options] [TARGET] [ARCHIVE]
+echo "Usage: $SCRIPT_NAME [options] [ARCHIVE]
      --help              diaplay this help text.
-  -p --pak-file=[FILE]   use a specific pak file.
+  -f --pak-file=[FILE]   use a specific pak file.
      --include           include specified paths.
      --no-ignore-pak     include the pak file in the resulting archive.
   -g --git               pak a directory according according to a '.gitignore'
@@ -32,10 +32,10 @@ get_git_targets()
 # Find all files pointed to by the pak file
 get_pak_targets()
 {
-    pattern=""
     while IFS= read -r path; do
+        path="$target_dir/$path"
         if [ -d "$path" ]; then
-            pattern="$pattern|.*/$path(/.*)?"
+            pattern="$pattern|$path(/.*)?"
         elif [ -f "$path" ]; then
             pattern="$pattern|.*/$path"
         fi
@@ -53,11 +53,6 @@ get_pak_targets()
 
 pak_git()
 {
-    if [ -z "$(git rev-parse --git-dir)" ]; then
-        echo_err "Not in a git repository."
-        exit 1
-    fi
-
     if [ -n "$tarball" ]; then
         tar --create --verbose --gzip --file "$archive" $(get_git_targets)
     else
@@ -67,15 +62,16 @@ pak_git()
 
 pak_dir()
 {
-	  if [ "$noignore" ]; then
-	      if [ -n "$tarball" ]; then
-	          tar --create --verbose --gzip --file "$archive" $(get_pak_targets)
+    get_pak_targets
+    if [ "$noignore" ]; then
+        if [ -n "$tarball" ]; then
+              tar --create --verbose --gzip --file "$archive" $(get_pak_targets)
         else
             zip "$archive" $(get_pak_targets)
         fi
     else
         if [ -n "$tarball" ]; then
-	          tar --create --gzip --verbose --file "$archive" $(get_pak_targets) --exclude "$pak_file"
+              tar --create --gzip --verbose --file "$archive" $(get_pak_targets) --exclude "$pak_file"
         else
             zip "$archive" $(get_pak_targets) -x "$pak_file"
         fi
@@ -83,19 +79,19 @@ pak_dir()
 }
 
 # parse options and arguments
-opts=$(getopt -qo "gp:" --long "help,include,git,pak-file:,no-ignore-pak,tarball" -- "$@")
+opts=$(getopt -qo "gp:f:" --long "help,include,git,pak-file:,no-ignore-pak,tarball" -- "$@")
 eval set -- "${opts}"
 
-pak_file=".pak"
 mode="ignore"
-target_dir="."
+target_dir=$(basename "$PWD")
+pak_file="$target_dir/.pak"
 
 while [ "$#" -ne 0 ]; do
     case "$1" in
         --help) usage
             exit 0
             ;;
-        --pak-file) pak_file="$2"
+        -f | --pak-file) pak_file="$2"
             shift
             ;;
         --include) mode="include"
@@ -113,17 +109,23 @@ while [ "$#" -ne 0 ]; do
     shift
 done
 
-if [ -n "$1" ]; then target_dir="$1"; fi
-if [ -n "$2" ]; then archive="$2"; fi
-if [ -z "$archive" ]; then archive="$(basename "$(realpath "$target_dir")")"; fi
+if [ -n "$1" ]; then archive="$1"; fi
+if [ -z "$archive" ]; then archive="$target_dir"; fi
 if [ -n "$tarball" ]; then archive="${archive}.tar.gz"; else archive="$archive.zip"; fi
 
 if [ "$mode" == "git" ]; then
+    if ! git rev-parse --git-dir &> /dev/null; then
+        exit 1
+    fi
+
+    cd "$(basename $(git rev-parse --show-toplevel))"
     pak_git
 else
+    cd ..
     if [ ! -e "$pak_file" ]; then
         echo_err "Could not find pak file '$pak_file'."
         exit 1
     fi
     pak_dir
+    mv "$archive" "$target_dir"
 fi
