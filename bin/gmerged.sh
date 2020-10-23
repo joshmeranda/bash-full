@@ -54,11 +54,11 @@ fi
 # exit on command error
 set -e
 
-echo "=== MERGING ==="
+echo -e "=== MERGING ===\n"
 git merge "$branch"
 
 if [ -n "$push" ]; then
-    echo "=== Pushing ==="
+    echo -e "=== Pushing ===\n"
     if [ "$remove" -eq 1 ]; then
         git push --delete origin "$branch"
     else
@@ -66,5 +66,5 @@ if [ -n "$push" ]; then
     fi
 fi
 
-echo "=== DELETING ==="
+echo -e "=== DELETING ===\n"
 git branch -D "$branch"
