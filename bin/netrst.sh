@@ -27,6 +27,9 @@ rfunblock() {
     if [ "${blocks[1]}" == "blocked" ]; then
         rfkill unblock wlan
     fi
+
+    # ensure that interface was unblocked
+    rfkill list wlan | grep "yes" && echo_err "wlan interface could not be unblocked" && exit 1
 }
 
 # parse options and arguments
@@ -44,6 +47,20 @@ while [ "$#" -gt 1 ]; do
             ;;
     esac
     shift
+done
+
+echo "=== STOPPING ${1^^} ==="
+sudo netctl stop "$1"
+
+echo "=== SETTING DOWN WIRELESS INTERFACES ==="
+interfaces="$(iw dev | awk '$1=="Interface"{printf $2 " "}')"
+
+for i in "${interfaces[@]}"; do
+    if [ -z "$i" ]; then
+        echo "warning: no interfaces found. recommend restart"
+        exit
+    fi
+    ip lin set "$i" down
 done
 
 echo "=== UNBLOCKING WLAN ==="
