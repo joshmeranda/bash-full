@@ -28,6 +28,6 @@ dest="${sources[-1]}"
 unset 'sources[${#sources[@]} - 1]'
 
 find "${sources[@]}" -mindepth 1 -maxdepth 1 -ignore_readdir_race -exec \
-    mv --verbose --target-directory "$dest" '{}' + 2>/dev/null
+    mv --verbose --target-directory "$dest" '{}' +
 
 rmdir --verbose "${sources[@]}"
