@@ -23,9 +23,8 @@ if [ "$#" -eq 0 ]; then
     exit 1
 fi
 
-
 # check for templates, and install from upstream if not found
-gitignore_dir='/usr/share/gitignore'
+gitignore_dir='$HOME/.local/share/gitignore'
 if [ ! -d $gitignore_dir ]; then
     echo_err "could not find templates: no such directory '$gitignore_dir'.
 Attempting to clone from $upstream_url..."

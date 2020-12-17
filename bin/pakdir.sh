@@ -1,4 +1,5 @@
 #!/bin/env bash
+# todo: remove support for git repositoris in favor of `git archive`
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Package all a directory according to the '.pak' file.                 #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
