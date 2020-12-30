@@ -6,7 +6,11 @@
 
 SCRIPT_NAME="$(basename "$0")"
 upstream_url='https://github.com/github/gitignore'
+
+# the directory where the gitignore repository to use was cloned
 gitignore_dir="$HOME/.local/share"
+
+# the directory of the cloned repo
 gitignore_repo="$gitignore_dir/gitignore"
 
 usage() {
@@ -14,6 +18,8 @@ echo "Usage: $SCRIPT_NAME [list | target...]
 
   list      request a list off supported gitignores
   target    a list of target gitignores to be included (case insensitive)
+  update    pull any changes made to the upstream repo into the local clone
+  help      show this help text
 
 For a complete list of all available targets please view the upstream repository here:
     $upstream_url"
@@ -23,12 +29,13 @@ echo_err() {
     echo -e "$SCRIPT_NAME: $1" 2>&1
 }
 
-# the directory where the gitignore repository to use was cloned
-
 if [ "$#" -eq 0 ]; then
     echo_err "missing operands."
     usage
     exit 1
+elif [ "$1" == "help" ]; then
+    usage
+    exit
 fi
 
 # check for templates, and install from upstream if not found
@@ -43,10 +50,17 @@ Attempting to clone from $upstream_url..."
     fi
 fi
 
-if [ "$1" == "list" ]; then
-    find "$gitignore_repo" -name '*.gitignore' -exec basename --multiple '{}' + | cut --delimiter . --fields 1
-    exit
-fi
+case "$1" in
+    "list" )
+        find "$gitignore_repo" -name '*.gitignore' -exec basename --multiple '{}' + | cut --delimiter . --fields 1
+        exit
+        ;;
+    "update" )
+        cd "$gitignore_repo"
+        git pull
+        exit
+        ;;
+esac
 
 # generate find predicates
 pattern=()
