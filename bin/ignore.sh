@@ -52,7 +52,7 @@ fi
 
 case "$1" in
     "list" )
-        find "$gitignore_repo" -name '*.gitignore' -exec basename --multiple '{}' + | cut --delimiter . --fields 1
+        find "$gitignore_repo" -name '*.gitignore' -exec basename --suffix .gitignore --multiple '{}' +
         exit
         ;;
     "update" )
