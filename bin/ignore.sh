@@ -16,8 +16,8 @@ gitignore_repo="$gitignore_dir/gitignore"
 usage() {
 echo "Usage: $SCRIPT_NAME [list | target...]
 
-  list      request a list off supported gitignores
   target    a list of target gitignores to be included (case insensitive)
+  list      request a list off supported gitignores
   update    pull any changes made to the upstream repo into the local clone
   help      show this help text
 
@@ -51,6 +51,9 @@ Attempting to clone from $upstream_url..."
 fi
 
 case "$1" in
+    "target" )
+        shift
+        ;;
     "list" )
         find "$gitignore_repo" -name '*.gitignore' -exec basename --suffix .gitignore --multiple '{}' +
         exit
@@ -60,6 +63,14 @@ case "$1" in
         git pull
         exit
         ;;
+    "help" )
+        usage
+        exit
+        ;;
+    * )
+        echo_err 'unkown ignore command'
+        exit 2
+        ;;
 esac
 
 # generate find predicates
@@ -67,6 +78,7 @@ pattern=()
 for name in "$@"; do
     predicates+=(-iname $name.gitignore -o)
 done
+
 predicates+=(-false) # necessary for trailinty '-o'
 
 # write gitignore file
