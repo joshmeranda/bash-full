@@ -2,6 +2,12 @@
 # # # # # # # # # # # # # # # #
 # Reconnect to netctl profile #
 # # # # # # # # # # # # # # # #
+
+if [ $(id -u) != 0 ]; then
+    echo "Must be root"
+    exit 1;
+fi
+
 SCRIPT_NAME="$(basename "$0")"
 usage()
 {
@@ -50,24 +56,24 @@ while [ "$#" -gt 1 ]; do
 done
 
 echo "=== STOPPING ${1^^} ==="
-sudo netctl stop "$1"
+netctl stop "$1"
 
 echo "=== SETTING DOWN WIRELESS INTERFACES ==="
-interfaces="$(iw dev | awk '$1=="Interface"{printf $2 " "}')"
+interfaces=($(iw dev | awk '$1=="Interface"{printf $2 " "}'))
 
 for i in "${interfaces[@]}"; do
     if [ -z "$i" ]; then
         echo "warning: no interfaces found. recommend restart"
         exit
     fi
-    ip lin set "$i" down
+    ip link set "$i" down
 done
 
 echo "=== UNBLOCKING WLAN ==="
 rfunblock
 
 echo "=== STARTING ${1^^} ==="
-sudo netctl restart "$1"
+netctl restart "$1"
 
 echo "=== PINGING ${ping_target^^} ==="
 until ping -c 1 "$ping_target"; do sleep 1; done
