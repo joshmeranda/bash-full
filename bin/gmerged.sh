@@ -54,17 +54,18 @@ fi
 # exit on command error
 set -e
 
-echo -e "=== MERGING ===\n"
+echo -e "=== MERGING ==="
 git merge "$branch"
 
 if [ -n "$push" ]; then
-    echo -e "=== Pushing ===\n"
+    echo -e "\n=== PUSHING ==="
     git push
 fi
 
-echo -e "=== DELETING ===\n"
-if [ "$remove" -eq 1 ]; then
-    git push --delete "$branch"
-else
+if [ "$delete" -eq 1 ]; then
+    echo -e "\n=== DELETEING REMOTE ==="
+    git push --delete origin "$branch"
+fi
 
+echo -e "\n=== DELETING LOCAL ==="
 git branch -D "$branch"
