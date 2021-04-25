@@ -8,7 +8,7 @@ SCRIPT_NAME="$(basename "$0")"
 usage() {
 echo "Usage: $SCRIPT_NAME [OPTIONS] BRANCH
      --help      display this help text.
-  -r --remove    delete the remote branch on push.
+  -d --delete    delete the remote branch on push.
   -p --push      push to remote after merge.
 "
 }
@@ -22,10 +22,10 @@ if [ "$#" -eq 0 ]; then
     exit 1
 fi
 
-opts=$(getopt -o "rp" --long "help,remove,push": -- "$@")
+opts=$(getopt -o "dp" --long "help,delete,push": -- "$@")
 eval set -- "${opts}"
 
-remove=0
+delete=0
 
 while true; do
     case "$1" in
@@ -33,8 +33,8 @@ while true; do
             usage
             exit 0
             ;;
-        -r | --remove)
-            remove=1
+        -d | --delete)
+            delete=1
             ;;
         -p | --push)
             push=1
