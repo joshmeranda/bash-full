@@ -59,12 +59,12 @@ git merge "$branch"
 
 if [ -n "$push" ]; then
     echo -e "=== Pushing ===\n"
-    if [ "$remove" -eq 1 ]; then
-        git push --delete origin "$branch"
-    else
-        git push
-    fi
+    git push
 fi
 
 echo -e "=== DELETING ===\n"
+if [ "$remove" -eq 1 ]; then
+    git push --delete "$branch"
+else
+
 git branch -D "$branch"
