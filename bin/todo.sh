@@ -2,17 +2,14 @@
 
 SCRIPT_NAME="$(basename "$0")"
 
-# todo_file="$HOME/.todo"
-todo_file="out"
+todo_file="$HOME/.todo"
 default_priority=9
 
-hide_priority=true
-
 usage() {
-echo "Usage: $SCRIPT_NAME [list | add DESCRIPTION [PRIORITY] | remove NUMBER | clear | help]
+echo "Usage: $SCRIPT_NAME [list [verbose] | add DESCRIPTION [PRIORITY] | remove NUMBER | clear | help]
 Very minimal utility for managing a TODO list
 
-  list            list all current todo items
+  list [verbose]  list all current todo items
   add DESCRIPTION [PRIORITY]  add a new item to the todo list
   remove NUMBER   delete the todo item with the given number from the todo list
   clear           remove all items from the list
@@ -36,14 +33,25 @@ verify_priority() {
 list() {
   test ! -e "$todo_file" && return 0
 
+  hide_priority=true
+
+  case "$1" in
+    "" ) ;;  # do nothing...
+    "verbose" ) hide_priority=false
+      ;;
+    * ) echo_err "unknown list modifier $1"
+      exit 1
+      ;;
+  esac
+
   line_no=1
 
-  while read line; do
+  while read -r line; do
 
     if $hide_priority; then
-      description=$(echo $line | cut -d ':' -f 2)
+      description=$(echo "$line" | cut -d ':' -f 2)
     else
-      description=$(echo $line | cut -d ':' -f 1,2)
+      description=$(echo "$line" | cut -d ':' -f 1,2)
     fi
 
     echo -e "$line_no)\t$description"
@@ -76,7 +84,7 @@ remove() {
 }
 
 clear() {
-  rm "$todo_file"
+  rm --force "$todo_file"
 }
 
 edit() {
