@@ -68,7 +68,7 @@ case "$1" in
         exit
         ;;
     * )
-        echo_err 'unkown ignore command'
+        echo_err 'unknown ignore command'
         exit 2
         ;;
 esac
