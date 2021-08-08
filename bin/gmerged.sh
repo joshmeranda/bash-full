@@ -66,7 +66,7 @@ if [ "$delete" -eq 1 ]; then
     echo -e "\n=== DELTEING LOCAL ==="
     git branch --delete "$branch"
 
-    if [ -n "$push" ] && [ -n "$(git ls-remote $(git config --get remote.origin.url) history)" ]; then
+    if [ -n "$push" ] && [ -n "$(git ls-remote $(git config --get remote.origin.url))" ]; then
         echo -e "\n=== DELETEING REMOTE ==="
         git push --delete origin "$branch"
     fi
