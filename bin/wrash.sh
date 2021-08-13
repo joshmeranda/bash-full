@@ -17,12 +17,19 @@ function usage {
 
 function handle_args {
     supported_coreutils=('ls' 'dir' 'vdir'
-                         'cd' 'mv' 'rm' 'shred'
+                         'mv' 'rm' 'shred'
                          'mkdir'
                          'chown' 'chgrp' 'chmod' 'touch')
 
     # check if command should be handled separately (builtins, select coreutils, etc)
-    if [ "$1" != 'help' ] && [ "$1" != 'exit' ] && [ "$(type -t "$1")" == "builtin" ] || [[ " ${supported_coreutils[@]} " =~ " ${1} " ]]; then
+    if [ "$1" == 'cd' ]; then
+        shift
+        cd $*
+
+        return
+    elif [ "$1" != 'help' ] && [ "$1" != 'exit' ] \
+        && [ "$(type -t "$1")" == "builtin" ] || [[ " ${supported_coreutils[@]} " =~ " ${1} " ]]; then
+
         bash -c "$*"
         return
     fi
@@ -47,7 +54,7 @@ if you were in a normal environment." ;;
 }
 
 function prompt {
-    echo "[$(whoami)] $root_command > "
+    echo "[$(whoami) $(pwd)] $root_command > "
 }
 
 if [ "$#" -eq 0 ]; then
