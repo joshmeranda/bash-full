@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# A minimal in-termal to-do list and manager                            #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 SCRIPT_NAME="$(basename "$0")"
 
@@ -57,7 +60,7 @@ list() {
     echo -e "$line_no)\t$description"
 
     ((line_no++))
-  done < $todo_file
+  done < "$todo_file"
 }
 
 add() {
