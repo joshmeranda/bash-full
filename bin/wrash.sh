@@ -41,12 +41,13 @@ function handle_args {
 
         'help' ) bash -c "$root_command --help" ;;
 
-        '?' ) echo "Thanks for using Artifi-Shell!
+        '?' ) echo "Thanks for using WraSh!
 
 To use the commands of the root command simply add the arguments as if you were
 calling the command normally (ex. 'commit -m example' instead of
 'git commit -m example'). You may also pass any bash shell builtins to run as
-if you were in a normal environment." ;;
+if you were in a normal environment, as well as some file management coreutils
+(ls, dir, vdir, mv, rm, shred, mkdir, chown, chgrp, chmod, and touch)." ;;
 
         # pass the arguments to the specified command
         * ) bash -c "$root_command $*" ;;
