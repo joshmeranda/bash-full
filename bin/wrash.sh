@@ -41,7 +41,7 @@ function handle_args {
 
         'help' ) bash -c "$root_command --help" ;;
 
-        '?' ) echo "Thanks for using WraSh!
+        '?' ) echo "Thanks for using Wrash!
 
 To use the commands of the root command simply add the arguments as if you were
 calling the command normally (ex. 'commit -m example' instead of
@@ -68,6 +68,11 @@ elif [ "$#" -ne 1 ]; then
     exit
 else
     root_command="$1"
+fi
+
+if ! which "$root_command" &> /dev/null; then
+    echo_err "no such command '$root_command' found on the PATH"
+    exit 1
 fi
 
 artifi_shell_header="starting wrapper shell: $($root_command --version).
