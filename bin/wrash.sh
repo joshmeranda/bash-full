@@ -32,6 +32,10 @@ function handle_args {
 
         bash -c "$*"
         return
+    elif [ "$1" == "$root_command" ]; then
+        echo "WARNING: given command matches the wrapped command, doing nothing."
+
+        return
     fi
 
     case "$*" in
