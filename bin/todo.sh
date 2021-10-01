@@ -1,39 +1,39 @@
 #!/usr/bin/env bash
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# A minimal in-termal to-do list and manager                            #
+# A minimal in-terminal to-do list and manager                          #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 SCRIPT_NAME="$(basename "$0")"
 
 todo_file="$HOME/.todo"
-default_priority=9
+default_priority=0
 
-usage() {
-echo "Usage: $SCRIPT_NAME [list [verbose] | add DESCRIPTION [PRIORITY] | remove NUMBER | clear | help]
+function usage {
+echo "Usage: $SCRIPT_NAME [list [verbose] | push [PRIORITY:]DESCRIPTION | pop [N] | edit N [PRIORITY:]DESCRIPTION | clear | help]
 Very minimal utility for managing a TODO list
 
-  list [verbose]  list all current todo items
-  add DESCRIPTION [PRIORITY]  add a new item to the todo list
-  remove NUMBER   delete the todo item with the given number from the todo list
-  clear           remove all items from the list
-  edit NUMBER PRIORITY re-prioritize an item
-  help            show this help text
+  list [verbose]                list all current todo items, can be abbreviated as 'ls'
+  push [PRIORITY:]DESCRIPTION   add a new item to the todo list
+  pop N                         delete the todo  item with the given number from the todo list
+  edit N [PRIORITY:]DESCRIPTION re-prioritize an item
+  clear                         remove all items from the list
+  help                          show this help text
 "
 }
 
-echo_err() {
+function echo_err {
     echo -e "$SCRIPT_NAME: $1" 2>&1
 }
 
-verify_line_no() {
-    echo "$1" | grep --quiet --extended-regexp "^[^0-9]$" && echo_err "invalid item number $1" && exit 1
+function verify_line_no {
+    [[ ! "$1" =~ ^[1-9][0-9]?$ ]] && echo_err "invalid item number '$1'" && exit 1
 }
 
-verify_priority() {
-  echo "$priority" | grep --quiet --invert-match --extended-regexp "^[0-9][0-9]?$" && echo_err "invalid priority $priority" && exit 1
+function verify_priority {
+    [[ ! "$1" =~ ^[1-9][0-9]?$ ]] && echo_err "invalid priority '$1'" && exit 1
 }
 
-list() {
+function list {
   test ! -e "$todo_file" && return 0
 
   hide_priority=true
@@ -42,7 +42,7 @@ list() {
     "" ) ;;  # do nothing...
     "verbose" ) hide_priority=false
       ;;
-    * ) echo_err "unknown list modifier $1"
+    * ) echo_err "unknown list modifier '$1'"
       exit 1
       ;;
   esac
@@ -63,22 +63,34 @@ list() {
   done < "$todo_file"
 }
 
-add() {
-  description="$1"
+function push {
+    if [[ ! "$1" =~ .*:.* ]]; then
+        description="$1"
+    else
+        priority="$(echo "$1" | cut --delimiter : --fields 1)"
+        description="$(echo "$1" | cut --delimite : --fields 2)"
+    fi
 
-  if [ -n "$2" ]; then
-    priority=$2
+    if [ -z "$priority" ] && [ -z "$description" ] || [ -z "$description" ]; then
+        echo "expected a description but found none"
+        usage
+        exit 1
+    elif [ -z "$priority" ]; then
+        priority=$default_priority
+    elif [ -z "$description" ]; then
+        description=$priority
+
+        priority=$default_priority
+    fi
+
     verify_priority "$priority"
-  else
-    priority=$default_priority
-  fi
 
-  test ! -e "$todo_file" && touch "$todo_file"
+    test ! -e "$todo_file" && touch "$todo_file"
 
-  echo "$priority:$description" | sort -o "$todo_file" - "$todo_file"
+    echo "$priority:$description" | sort  --reverse --output "$todo_file" - "$todo_file"
 }
 
-remove() {
+function pop {
   line_no="$1"
 
   verify_line_no "$line_no"
@@ -86,22 +98,39 @@ remove() {
   sed -i "${line_no}d" "$todo_file"
 }
 
-clear() {
+function clear {
   rm --force "$todo_file"
 }
 
-edit() {
-  line_no="$1"
-  priority="$2"
+function edit {
+    line_no="$1"
+    verify_line_no "$line_no"
 
-  verify_line_no "$line_no"
-  verify_priority "$priority"
+    if [[ ! "$2" =~ .*:.* ]]; then
+        description="$2"
+    else
+        priority="$(echo "$2" | cut --delimiter : --fields 1)"
+        description="$(echo "$2" | cut --delimite : --fields 2)"
+    fi
 
-  line=$(sed "${line_no}q;d" "$todo_file")
-  description=$(echo "$line" | cut -d ':' -f 2)
+    if [ -z "$priority" ] && [ -z "$description" ] || [ -z "$description" ]; then
+        echo "expected a description but found none"
+        usage
+        exit 1
+    elif [ -z "$priority" ]; then
+        priority=$default_priority
+    elif [ -z "$description" ]; then
+        description=$priority
 
-  remove "$line_no"
-  add "$description" "$priority"
+        priority=$default_priority
+    fi
+
+    verify_priority "$priority"
+
+    line=$(sed "${line_no}q;d" "$todo_file")
+
+    pop "$line_no"
+    push "$description" "$priority"
 }
 
 if [ "$#" -eq 0 ]; then
@@ -114,11 +143,11 @@ command="$1"
 shift
 
 case "$command" in
-  "list" ) list "$@"
+  "list" | "ls") list "$@"
     ;;
-  "add" ) add "$@"
+  "push" ) push "$@"
     ;;
-  "remove" ) remove "$@"
+  "pop" ) pop "$@"
     ;;
   "clear" ) clear "$@"
     ;;
