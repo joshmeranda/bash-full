@@ -21,5 +21,5 @@ while :; do
 done
 
 for path in "$@"; do
-    cp "$path" "${prefix}${path}${suffix}"
+    cp --recursive "$path" "${prefix}${path}${suffix}"
 done
