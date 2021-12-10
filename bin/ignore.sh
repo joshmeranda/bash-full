@@ -13,20 +13,32 @@ gitignore_dir="$HOME/.local/share"
 # the directory of the cloned repo
 gitignore_repo="$gitignore_dir/gitignore"
 
-usage() {
+function usage {
 echo "Usage: $SCRIPT_NAME [list | target...]
 
   target    a list of target gitignores to be included (case insensitive)
   list      request a list off supported gitignores
-  update    pull any changes made to the upstream repo into the local clone
+  update    pull any changes made to the upstream repo into the local clone, or
+            clone upstream if no local repository found
   help      show this help text
 
 For a complete list of all available targets please view the upstream repository here:
     $upstream_url"
 }
 
-echo_err() {
+function echo_err {
     echo -e "$SCRIPT_NAME: $1" 2>&1
+}
+
+function update() {
+    if [ ! -d "$gitignore_repo" ]; then
+        echo "[info] no ignore repository found, cloning from '$upstream_url'"
+        git clone "$upstream_url" "$gitignore_repo"
+    else
+        cd "$gitignore_repo"
+        git pull
+        cd -
+    fi
 }
 
 if [ "$#" -eq 0 ]; then
@@ -38,18 +50,6 @@ elif [ "$1" == "help" ]; then
     exit
 fi
 
-# check for templates, and install from upstream if not found
-if [ ! -d $gitignore_dir ]; then
-    echo_err "could not find templates: no such directory '$gitignore_dir'.
-Attempting to clone from $upstream_url..."
-
-    cd $(dirname $gitignore_dir)
-    if ! git clone $upstream_url;then
-        echo_err "Could not install templates"
-        exit 1
-    fi
-fi
-
 case "$1" in
     "target" )
         shift
@@ -59,8 +59,7 @@ case "$1" in
         exit
         ;;
     "update" )
-        cd "$gitignore_repo"
-        git pull
+        update
         exit
         ;;
     "help" )
@@ -88,7 +87,6 @@ echo "# # # # # # # # # # # ## # # # # # # # # # # # # # # # # # # # # # # # # #
 # This gitignore was auto-generated using the standard templates published by  #
 # github here: github.com/github/gitignore                                     #
 # # # # # # # # # # # ## # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
 " > $gitignore
 
 for target in $(find $gitignore_repo ${predicates[@]}); do
