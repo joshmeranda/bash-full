@@ -1,4 +1,4 @@
-install_dir=/usr/local/bin
+PREFIX=/usr/local/bin
 
 scripts:=$(realpath $(shell ls ./bin/*))
 bins:=$(addprefix ${install_dir}/, $(notdir ${scripts}))
@@ -7,7 +7,7 @@ bins:=$(addprefix ${install_dir}/, $(notdir ${scripts}))
 
 install:
 	for script in ${scripts}; do \
-		ln --verbose --force --symbolic $$script ${install_dir}; \
+		ln --verbose --force --symbolic $$script ${PREFIX}; \
 	done
 
 uninstall:
